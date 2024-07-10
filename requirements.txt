@@ -9,4 +9,4 @@ openpyxl
 plotly
 pdfplumber
 nltk
-sklearn
+scikit-learn
