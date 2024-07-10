@@ -42,7 +42,7 @@ def extract_text_from_pdf(file):
     return text
 
 # Streamlit App
-st.title("TF-IDF 關鍵字提取")
+st.title("文章關鍵字提取與排序(按 TF-IDF)")
 
 # 上傳文件
 uploaded_files = st.file_uploader("上傳你的文本或PDF文件", type=["txt", "pdf"], accept_multiple_files=True)
