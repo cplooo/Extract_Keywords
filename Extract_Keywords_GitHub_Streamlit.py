@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jul 10 12:49:04 2024
+Created on Wed Jul 10 15:19:09 2024
 
 @author: user
 """
@@ -12,6 +12,9 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 import string
+import xml.etree.ElementTree as ET
+from urllib.request import urlretrieve
+import os
 
 # 確認是否已經下載所需的NLTK資源，否則進行下載
 nltk.download('punkt')
@@ -41,8 +44,27 @@ def extract_text_from_pdf(file):
             text += page.extract_text()
     return text
 
+def download_mesh_data():
+    url = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2023.xml"
+    file_path = "desc2023.xml"
+    if not os.path.exists(file_path):
+        urlretrieve(url, file_path)
+    return file_path
+
+def load_mesh_terms(file_path):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    mesh_terms = set()
+    for descriptor in root.findall(".//DescriptorRecord/DescriptorName/String"):
+        mesh_terms.add(descriptor.text.lower())
+    return mesh_terms
+
+# 下載和加載 MeSH 資料
+mesh_file_path = download_mesh_data()
+mesh_terms = load_mesh_terms(mesh_file_path)
+
 # Streamlit App
-st.title("文章關鍵字提取與排序(按 TF-IDF)")
+st.title("醫學關鍵字提取")
 
 # 上傳文件
 uploaded_files = st.file_uploader("上傳你的文本或PDF文件", type=["txt", "pdf"], accept_multiple_files=True)
@@ -68,14 +90,14 @@ if uploaded_files:
     # 取得特徵名稱（關鍵字）
     feature_names = vectorizer.get_feature_names_out()
     
-    # 顯示每篇文章的TF-IDF值
+    # 顯示每篇文章的醫學關鍵字及其TF-IDF值
     for i, text in enumerate(processed_texts):
         st.subheader(f"Text {i+1}:")
         tfidf_scores = zip(feature_names, tfidf_matrix[i].toarray()[0])
         sorted_scores = sorted(tfidf_scores, key=lambda x: x[1], reverse=True)
         for keyword, score in sorted_scores:
-            if score > 0:
-                st.write(f"Keyword: {keyword}, Score: {score:.4f}")
+            if score > 0 and keyword in mesh_terms:
+                st.write(f"Medical Keyword: {keyword}, Score: {score:.4f}")
         st.write("\n")
 else:
     st.write("請上傳一個或多個文本或PDF文件。")
