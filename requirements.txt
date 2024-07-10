@@ -10,3 +10,4 @@ plotly
 pdfplumber
 nltk
 scikit-learn
+biopython
