@@ -14,7 +14,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import string
 
 # 確認是否已經下載所需的NLTK資源，否則進行下載
-nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 
 def preprocess_text(text):
